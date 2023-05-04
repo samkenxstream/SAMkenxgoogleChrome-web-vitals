@@ -19,6 +19,7 @@
 - [API](#api)
   - [Types](#types)
   - [Functions](#functions)
+  - [Rating Thresholds](#rating-thresholds)
   - [Attribution](#attribution)
 - [Browser Support](#browser-support)
 - [Limitations](#limitations)
@@ -761,6 +762,26 @@ Metric-specific subclasses:
 - [`LCPMetricWithAttribution`](/src/types/lcp.ts#:~:text=interface%20LCPMetricWithAttribution)
 - [`TTFBMetricWithAttribution`](/src/types/ttfb.ts#:~:text=interface%20TTFBMetricWithAttribution)
 
+#### `MetricRatingThresholds`
+
+The thresholds of metric's "good", "needs improvement", and "poor" ratings.
+
+- Metric values up to and including [0] are rated "good"
+- Metric values up to and including [1] are rated "needs improvement"
+- Metric values above [1] are "poor"
+
+| Metric value    | Rating              |
+| --------------- | ------------------- |
+| ≦ [0]           | "good"              |
+| > [0] and ≦ [1] | "needs improvement" |
+| > [1]           | "poor"              |
+
+```ts
+export type MetricRatingThresholds = [number, number];
+```
+
+_See also [Rating Thresholds](#rating-thresholds)._
+
 #### `ReportCallback`
 
 ```ts
@@ -945,6 +966,22 @@ onTTFB((metric) => {
 
 _**Note:** browsers that do not support `navigation` entries will fall back to
 using `performance.timing` (with the timestamps converted from epoch time to [`DOMHighResTimeStamp`](https://developer.mozilla.org/en-US/docs/Web/API/DOMHighResTimeStamp)). This ensures code referencing these values (like in the example above) will work the same in all browsers._
+
+### Rating Thresholds:
+
+The thresholds of each metric's "good", "needs improvement", and "poor" ratings are available as [`MetricRatingThresholds`](#metricratingthresholds).
+
+Example:
+
+```ts
+import {CLSThresholds, FIDThresholds, LCPThresholds} from 'web-vitals';
+
+console.log(CLSThresholds); // [ 0.1, 0.25 ]
+console.log(FIDThresholds); // [ 100, 300 ]
+console.log(LCPThresholds); // [ 2500, 4000 ]
+```
+
+_**Note:** It's typically not necessary (or recommended) to manually calculate metric value ratings using these thresholds. Use the [`Metric['rating']`](#metric) supplied by the [`ReportCallback`](#reportcallback) functions instead._
 
 ### Attribution:
 
@@ -1194,9 +1231,7 @@ Browser support for each function is as follows:
 
 ## Limitations
 
-The `web-vitals` library is primarily a wrapper around the Web APIs that
-measure the Web Vitals metrics, which means the limitations of those APIs will
-mostly apply to this library as well.
+The `web-vitals` library is primarily a wrapper around the Web APIs that measure the Web Vitals metrics, which means the limitations of those APIs will mostly apply to this library as well. More details on these limitations is available in [this blog post](https://web.dev/crux-and-rum-differences/).
 
 The primary limitation of these APIs is they have no visibility into `<iframe>` content (not even same-origin iframes), which means pages that make use of iframes will likely see a difference between the data measured by this library and the data available in the Chrome User Experience Report (which does include iframe content).
 
